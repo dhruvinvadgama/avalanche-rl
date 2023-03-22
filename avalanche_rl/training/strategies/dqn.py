@@ -92,6 +92,23 @@ class DQNStrategy(RLBaseStrategy):
             # from stable baseline 3 enhancement https://github.com/DLR-RM/stable-baselines3/issues/93
             with torch.no_grad():
                 # all done in-place for efficiency
+
+                # compute the norm of the weights
+                parameters = []
+                for param in self.model.parameters():
+                    parameters.append(param.flatten())
+                parameters = torch.cat(parameters)
+                norm = torch.norm(parameters, 2)
+                # norm = torch.norm(self.model.parameters(), 2)
+
+                # compute the scaling factor
+                scaling_factor = 1 / norm if norm > 1 else 1
+
+                for param, target_param in zip(
+                        self.model.parameters(),
+                        self.target_net.parameters()):
+                    target_param.data = scaling_factor * param.data.clone()
+
                 for param, target_param in zip(
                         self.model.parameters(),
                         self.target_net.parameters()):

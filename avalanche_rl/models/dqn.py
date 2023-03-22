@@ -1,11 +1,11 @@
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
+from torch.nn.utils import weight_norm
 from avalanche.models.simple_mlp import SimpleMLP
 
 
 class DQNModel(nn.Module):
-
     def __init__(self):
         super().__init__()
 
@@ -58,6 +58,9 @@ class ConvDeepQN(DQNModel):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
+
+        # apply synaptic scaling to the fully connected layer
+        # self.synaptic_scaling()
 
         # feed to linear layer
         x = x.flatten(1)
